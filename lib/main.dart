@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/settings_page.dart';
 import 'home_page.dart';
 import 'camera_page.dart';
+import "accessibility_service.dart";
+import 'package:provider/provider.dart';
 
 final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 
 void main() {
-  runApp(MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => SpeechProvider(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -21,6 +29,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => HomePage(),
         '/camera': (context) => CameraPage(),
+        '/settings': (context) => SettingsPage(),
       },
       navigatorObservers: [routeObserver],
     );

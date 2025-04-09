@@ -1,11 +1,14 @@
 import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:speech_to_text/speech_to_text.dart' as stt;
-import 'package:permission_handler/permission_handler.dart';
 
+/// Serviço de acessibilidade para feedback de voz
 class AccessibilityService {
+  static final AccessibilityService _instance = AccessibilityService._internal();
+  factory AccessibilityService() => _instance;
   FlutterTts flutterTts = FlutterTts();
-  final stt.SpeechToText _speech = stt.SpeechToText();
+
+  AccessibilityService._internal();
 
   Future<void> speak(String text) async {
     await flutterTts.setLanguage("pt-BR");
@@ -17,40 +20,26 @@ class AccessibilityService {
     await flutterTts.stop();
   }
 
-  Future<String> startListening() async {
-    bool available = await _speech.initialize(onStatus: (status) {
-        print("Status do reconhecimento: $status");
-      },
-      onError: (error) {
-        print("Erro no reconhecimento: $error");
-      },
-    );
+}
 
-    if (available) {
-      final completer = Completer<String>();
+/// Provider para controlar o estado do feedback de voz
+class SpeechProvider extends ChangeNotifier {
+  bool _speechEnabled = true;
 
-      _speech.listen(
-        onResult: (result) {
-          if (result.finalResult && result.recognizedWords.isNotEmpty){
-            print("Reconhecido: ${result.recognizedWords}");
-            completer.complete(result.recognizedWords);
-          }
-        },
-        listenFor: Duration(seconds: 10), // ✅ Mantém o microfone aberto por 5s
-        pauseFor: Duration(seconds: 2), // ✅ Espera 2s antes de encerrar
-      );
-      return completer.future;
-    } else {
-      print("Não foi possível inicializar o reconhecimento de fala.");
-      return 'nao foi possivel';
+  bool get speechEnabled => _speechEnabled;
+
+  void set(bool value) {
+    _speechEnabled = value;
+    notifyListeners();
+  }
+
+  Future<void> speak(String text) async {
+    if (_speechEnabled) {
+      await AccessibilityService().speak(text);
     }
   }
 
-  void stopListening() {
-    _speech.stop();
-  }
-
-  Future<void> requestPermissions() async {
-    await Permission.microphone.request();
+  Future<void> stop() async {
+    await AccessibilityService().stopSpeak();
   }
 }
