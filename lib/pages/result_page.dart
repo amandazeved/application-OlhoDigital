@@ -1,10 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
-import 'accessibility_service.dart';
+import '../core/voice_feedback_service.dart';
 
 class ResultPage extends StatefulWidget{
   final String imagePath;
@@ -36,21 +35,22 @@ class _ResultPageState extends State<ResultPage> with RouteAware {
 
 		// Convertendo imagem para base64
     File imageFile = File(widget.imagePath);
-    Uint8List imageBytes = await imageFile.readAsBytes();
-    String base64Image = base64Encode(imageBytes);
 
-    final decodedImage = await decodeImageFromList(imageBytes);
+    final decodedImage = await decodeImageFromList(await imageFile.readAsBytes());
     _imageWidth = decodedImage.width.toDouble();
     _imageHeight = decodedImage.height.toDouble();
 
     try {
     	print('Enviando imagem...');
-      var response = await http.post(
+      var request = http.MultipartRequest(
+        'POST',
         Uri.parse('http://10.0.2.2:5000/process_image'),
-        // Uri.parse('https://api-flask-yolo.onrender.com/upload'),
-        body: jsonEncode({'image': base64Image}),
-        headers: {'Content-Type': 'application/json'},
-      ).timeout(const Duration(seconds: 90));
+      );
+      request.files.add(
+        await http.MultipartFile.fromPath('image', imageFile.path)
+      );
+      var streamedResponse = await request.send().timeout(const Duration(seconds: 90));
+      var response = await http.Response.fromStream(streamedResponse);
       print('Recebeu resposta');
 
       if (response.statusCode == 200) {

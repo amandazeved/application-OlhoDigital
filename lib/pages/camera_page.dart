@@ -59,6 +59,8 @@ class _CameraPageState extends State<CameraPage> with RouteAware {
     }
   }
 
+  // Apenas para o emulador
+  // ignore: unused_element
   Future<void> _pickImageFromGallery() async {
     final ImagePicker picker = ImagePicker();
     final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
@@ -115,15 +117,16 @@ class _CameraPageState extends State<CameraPage> with RouteAware {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Tooltip(
-                  message: 'Abrir galeria',
-                  child: FloatingActionButton(
-                    tooltip: 'Abrir galeria',
-                    backgroundColor: Colors.grey[300],
-                    onPressed: _pickImageFromGallery,
-                    child: Icon(Icons.photo, color: Colors.black, size: 45),
-                  ),
-                ),
+                // Apenas para o emulador
+                // Tooltip(
+                //   message: 'Abrir galeria',
+                //   child: FloatingActionButton(
+                //     tooltip: 'Abrir galeria',
+                //     backgroundColor: Colors.grey[300],
+                //     onPressed: _pickImageFromGallery,
+                //     child: Icon(Icons.photo, color: Colors.black, size: 45),
+                //   ),
+                // ),
                 Tooltip(
                   message: 'Tirar foto',
                   child: FloatingActionButton(

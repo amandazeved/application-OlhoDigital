@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import "accessibility_service.dart";
+import "../core/voice_feedback_service.dart";
 import 'package:provider/provider.dart';
 
 class SettingsPage extends StatelessWidget {

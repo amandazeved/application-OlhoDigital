@@ -3,20 +3,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
 /// Serviço de acessibilidade para feedback de voz
-class AccessibilityService {
-  static final AccessibilityService _instance = AccessibilityService._internal();
-  factory AccessibilityService() => _instance;
+class VoiceFeedbackService {
+  static final VoiceFeedbackService _instance = VoiceFeedbackService._internal();
+  factory VoiceFeedbackService() => _instance;
   FlutterTts flutterTts = FlutterTts();
 
-  AccessibilityService._internal();
+  VoiceFeedbackService._internal(){
+    _initTts();
+  }
 
-  Future<void> speak(String text) async {
+  void _initTts() async{
     await flutterTts.setLanguage("pt-BR");
     await flutterTts.setPitch(1); // tom de voz
+  }
+
+  Future<void> speak(String text) async {
     await flutterTts.speak(text);
   }
 
-  Future<void> stopSpeak() async {
+  Future<void> stop() async {
     await flutterTts.stop();
   }
 
@@ -35,11 +40,13 @@ class SpeechProvider extends ChangeNotifier {
 
   Future<void> speak(String text) async {
     if (_speechEnabled) {
-      await AccessibilityService().speak(text);
+      await VoiceFeedbackService().speak(text);
     }
   }
 
   Future<void> stop() async {
-    await AccessibilityService().stopSpeak();
+    if (_speechEnabled) {
+      await VoiceFeedbackService().stop();
+    }
   }
 }

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/settings_page.dart';
-import 'home_page.dart';
-import 'camera_page.dart';
-import "accessibility_service.dart";
+import 'package:flutter_application_1/pages/settings_page.dart';
+import 'pages/home_page.dart';
+import 'pages/camera_page.dart';
+import "core/voice_feedback_service.dart";
 import 'package:provider/provider.dart';
-
-final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 
 void main() {
   runApp(
@@ -30,8 +28,7 @@ class MyApp extends StatelessWidget {
         '/': (context) => HomePage(),
         '/camera': (context) => CameraPage(),
         '/settings': (context) => SettingsPage(),
-      },
-      navigatorObservers: [routeObserver],
+      }
     );
   }
 }
