@@ -15,7 +15,7 @@ OlhoDigital é um aplicativo Flutter desenvolvido para oferecer assistência a p
  - Camera Plugin para captura de imagens.
  - HTTP Client para comunicação com o servidor.
  - TTS (Text-to-Speech) para leitura de texto em voz alta.
- - (API de Detecção de Objetos)[https://github.com/amandazeved/api-flask-yolo] no backend para reconhecimento e cálculo de distâncias. 
+ - [API de Detecção de Objetos](https://github.com/amandazeved/api-flask-yolo) no backend para reconhecimento e cálculo de distâncias. 
 
 ## Como executar projeto
 
