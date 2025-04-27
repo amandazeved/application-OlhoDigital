@@ -15,6 +15,8 @@ class CameraPage extends StatefulWidget {
 class _CameraPageState extends State<CameraPage> with RouteAware {
   CameraController? _cameraController;
   List<CameraDescription>? cameras;
+  int selectedCameraIndex = 0;
+  FlashMode _flashMode = FlashMode.auto; // Flash auto por padrão
 
   @override
   void initState() {
@@ -22,20 +24,58 @@ class _CameraPageState extends State<CameraPage> with RouteAware {
     _initializeCamera();
   }
 
-  Future<void> _initializeCamera() async {
-    cameras = await availableCameras();
-    if (cameras!.isNotEmpty) {
-      _cameraController = CameraController(cameras![0], ResolutionPreset.high);
-      await _cameraController!.initialize();
-      await _cameraController!.setFlashMode(FlashMode.auto);
-      setState(() {});
-    }
-  }
-
   @override
   void dispose() {
     _cameraController?.dispose();
     super.dispose();
+  }
+
+  Future<void> _initializeCamera() async {
+    cameras = await availableCameras();
+    if (cameras!.isNotEmpty) {
+      // Escolhe a câmera traseira por padrão
+      final backCamera = cameras!.firstWhere(
+        (camera) => camera.lensDirection == CameraLensDirection.back,
+        orElse: () => cameras!.first,
+      );
+      selectedCameraIndex = cameras!.indexOf(backCamera);
+
+      _cameraController = CameraController(
+        cameras![selectedCameraIndex], 
+        ResolutionPreset.high
+      );
+      await _cameraController!.initialize();
+      await _cameraController!.setFlashMode(_flashMode);
+      setState(() {});
+    }
+  }
+
+  Future<void> _switchCamera() async {
+    if (cameras == null || cameras!.isEmpty) return;
+
+    selectedCameraIndex = (selectedCameraIndex + 1) % cameras!.length;
+    _cameraController = CameraController(
+      cameras![selectedCameraIndex],
+      ResolutionPreset.high,
+    );
+    await _cameraController!.initialize();
+    await _cameraController!.setFlashMode(_flashMode);
+    setState(() {});
+  }
+
+  Future<void> _toggleFlash() async {
+    if (_cameraController == null) return;
+
+    if (_flashMode == FlashMode.auto) {
+      _flashMode = FlashMode.always;
+    } else if (_flashMode == FlashMode.always) {
+      _flashMode = FlashMode.off;
+    } else {
+      _flashMode = FlashMode.auto;
+    }
+
+    await _cameraController!.setFlashMode(_flashMode);
+    setState(() {});
   }
 
   Future<void> _takePhoto() async {
@@ -60,7 +100,6 @@ class _CameraPageState extends State<CameraPage> with RouteAware {
   }
 
   // Apenas para o emulador
-  // ignore: unused_element
   Future<void> _pickImageFromGallery() async {
     final ImagePicker picker = ImagePicker();
     final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
@@ -73,12 +112,26 @@ class _CameraPageState extends State<CameraPage> with RouteAware {
     }
   }
 
+  IconData _getFlashIcon() {
+    switch (_flashMode) {
+      case FlashMode.auto:
+        return Icons.flash_auto;
+      case FlashMode.always:
+        return Icons.flash_on;
+      case FlashMode.off:
+        return Icons.flash_off;
+      default:
+        return Icons.flash_auto;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_cameraController == null || !_cameraController!.value.isInitialized) {
+      // Mostra um carregamento enquanto a câmera liga
       return Center(
         child: CircularProgressIndicator(),
-      ); // Mostra um carregamento enquanto a câmera liga
+      );
     }
 
     return Scaffold(
@@ -107,8 +160,27 @@ class _CameraPageState extends State<CameraPage> with RouteAware {
               ),
             ),
         ),
-
-        // Botão de tirar foto
+        // Botão para trocar o modo do flash
+        Positioned(
+            top: 50,
+            right: 80,
+            child: IconButton(
+              icon: Icon(_getFlashIcon(), color: Colors.white, size: 32),
+              onPressed: _toggleFlash,
+              tooltip: 'Trocar Flash',
+            ),
+          ),
+          // Botão para trocar câmera
+          Positioned(
+            top: 50,
+            right: 10,
+            child: IconButton(
+              icon: const Icon(Icons.cameraswitch, color: Colors.white, size: 32),
+              onPressed: _switchCamera,
+              tooltip: 'Trocar Câmera',
+            ),
+          ),
+        
         Positioned(
           bottom: 80,
           left: 0,
@@ -118,15 +190,16 @@ class _CameraPageState extends State<CameraPage> with RouteAware {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 // Apenas para o emulador
-                // Tooltip(
-                //   message: 'Abrir galeria',
-                //   child: FloatingActionButton(
-                //     tooltip: 'Abrir galeria',
-                //     backgroundColor: Colors.grey[300],
-                //     onPressed: _pickImageFromGallery,
-                //     child: Icon(Icons.photo, color: Colors.black, size: 45),
-                //   ),
-                // ),
+                Tooltip(
+                  message: 'Abrir galeria',
+                  child: FloatingActionButton(
+                    tooltip: 'Abrir galeria',
+                    backgroundColor: Colors.grey[300],
+                    onPressed: _pickImageFromGallery,
+                    child: Icon(Icons.photo, color: Colors.black, size: 45),
+                  ),
+                ),
+                // Botão de tirar foto
                 Tooltip(
                   message: 'Tirar foto',
                   child: FloatingActionButton(

@@ -1,16 +1,37 @@
-# flutter_application_1
+# OlhoDigital
 
-A new Flutter project.
+OlhoDigital é um aplicativo Flutter desenvolvido para oferecer assistência a pessoas com deficiência visual. Ele captura imagens do ambiente, processa automaticamente as informações e descreve a cena de maneira acessível através de texto e leitura por voz.
 
-## Getting Started
+## Funcionalidades
+ 
+ - Captura de Imagem: Capture rapidamente uma foto do ambiente.
+ - Processamento Inteligente: As imagens são enviadas para o servidor, onde objetos são detectados e suas distâncias em relação ao usuário são calculadas.
+ - Descrição de Cena: Receba uma descrição textual do ambiente.
+ - Configurações de Acessibilidade: Permite ativar ou desativar a leitura por voz conforme a preferência do usuário.
 
-This project is a starting point for a Flutter application.
+## Tecnologias Utilizadas
 
-A few resources to get you started if this is your first Flutter project:
+ - Flutter para o desenvolvimento do aplicativo.
+ - Camera Plugin para captura de imagens.
+ - HTTP Client para comunicação com o servidor.
+ - TTS (Text-to-Speech) para leitura de texto em voz alta.
+ - (API de Detecção de Objetos)[https://github.com/amandazeved/api-flask-yolo] no backend para reconhecimento e cálculo de distâncias. 
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## Como executar projeto
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+1. Clone o repositório:
+```bash
+git clone https://github.com/amandazeved/application-OlhoDigital.git
+cd application-OlhoDigital
+```
+
+2. Instale as dependências:
+```bash
+flutter pub get
+```
+
+3. Execute o aplicativo:
+```bash
+flutter run
+```
+
