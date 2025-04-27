@@ -17,6 +17,8 @@ class _CameraPageState extends State<CameraPage> with RouteAware {
   List<CameraDescription>? cameras;
   int selectedCameraIndex = 0;
   FlashMode _flashMode = FlashMode.auto; // Flash auto por padrão
+  String _strFlashMode = "automático";
+  String _strCameraMode = "traseira";
 
   @override
   void initState() {
@@ -41,8 +43,8 @@ class _CameraPageState extends State<CameraPage> with RouteAware {
       selectedCameraIndex = cameras!.indexOf(backCamera);
 
       _cameraController = CameraController(
-        cameras![selectedCameraIndex], 
-        ResolutionPreset.high
+        cameras![selectedCameraIndex],
+        ResolutionPreset.high,
       );
       await _cameraController!.initialize();
       await _cameraController!.setFlashMode(_flashMode);
@@ -86,7 +88,8 @@ class _CameraPageState extends State<CameraPage> with RouteAware {
 
       // Salva a foto no armazenamento do app
       final directory = await getApplicationDocumentsDirectory();
-      final String filePath = '${directory.path}/${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final String filePath =
+          '${directory.path}/${DateTime.now().millisecondsSinceEpoch}.jpg';
       await File(photo.path).copy(filePath);
 
       // Vai para a tela de exibição da foto
@@ -102,12 +105,16 @@ class _CameraPageState extends State<CameraPage> with RouteAware {
   // Apenas para o emulador
   Future<void> _pickImageFromGallery() async {
     final ImagePicker picker = ImagePicker();
-    final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    final XFile? pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
+    );
 
     if (pickedFile != null) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => ResultPage(imagePath: pickedFile.path)),
+        MaterialPageRoute(
+          builder: (_) => ResultPage(imagePath: pickedFile.path),
+        ),
       );
     }
   }
@@ -125,98 +132,164 @@ class _CameraPageState extends State<CameraPage> with RouteAware {
     }
   }
 
+  // Atualiza o texto descritivo do flash
+  void _updateFlashModeLabel() {
+    switch (_flashMode) {
+      case FlashMode.auto:
+        _strFlashMode = "automático";
+        break;
+      case FlashMode.always:
+        _strFlashMode = "ligado";
+        break;
+      case FlashMode.off:
+        _strFlashMode = "desligado";
+        break;
+      default:
+        _strFlashMode = "automático";
+    }
+  }
+
+  // Atualiza o texto descritivo da câmera
+  void _updateCameraModeLabel() {
+    final lensDirection = cameras?[selectedCameraIndex].lensDirection;
+    switch (lensDirection) {
+      case CameraLensDirection.back:
+        _strCameraMode = "traseira";
+        break;
+      case CameraLensDirection.front:
+        _strCameraMode = "frontal";
+        break;
+      case CameraLensDirection.external:
+        _strCameraMode = "externa";
+        break;
+      default:
+        _strCameraMode = "desconhecido";
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_cameraController == null || !_cameraController!.value.isInitialized) {
       // Mostra um carregamento enquanto a câmera liga
-      return Center(
-        child: CircularProgressIndicator(),
-      );
+      return Center(child: CircularProgressIndicator());
     }
 
     return Scaffold(
       body: Stack(
-      children: [
-        // Câmera ocupa toda a tela
-        Positioned.fill(
-          child: Semantics(
-            label: 'Câmera',
-            child: CameraPreview(_cameraController!),
+        children: [
+          // Câmera ocupa toda a tela
+          Positioned.fill(
+            child: Semantics(
+              label: 'Câmera',
+              child: CameraPreview(_cameraController!),
+            ),
           ),
-        ),
 
-        // botao de voltar
-        Positioned(
-          top: 50,
-          left: 10,
-          child: Center(
-            child: Tooltip(
-                message: 'Voltar',
-                child: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Color(0xFF062757), size: 36),
-                  onPressed: () => Navigator.pop(context),
-                  tooltip: 'Voltar para menu inicial',
+          // botao de voltar
+          Positioned(
+            top: 50,
+            left: 10,
+            child: Center(
+              child: Semantics(
+                label: 'Voltar',
+                button: true,
+                child: ExcludeSemantics(
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: Color(0xFF062757),
+                      size: 36,
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                    tooltip: 'Voltar para menu inicial',
+                  ),
                 ),
               ),
             ),
-        ),
-        // Botão para trocar o modo do flash
-        Positioned(
+          ),
+          // Botão para trocar o modo do flash
+          Positioned(
             top: 50,
             right: 80,
-            child: IconButton(
-              icon: Icon(_getFlashIcon(), color: Colors.white, size: 32),
-              onPressed: _toggleFlash,
-              tooltip: 'Trocar Flash',
+            child: Semantics(
+              label: 'Flash $_strFlashMode: Trocar Flash',
+              button: true,
+              child: ExcludeSemantics(
+                child: IconButton(
+                  icon: Icon(_getFlashIcon(), color: Colors.white, size: 32),
+                  onPressed: _toggleFlash,
+                  tooltip: 'Trocar Flash',
+                ),
+              ),
             ),
           ),
           // Botão para trocar câmera
           Positioned(
             top: 50,
             right: 10,
-            child: IconButton(
-              icon: const Icon(Icons.cameraswitch, color: Colors.white, size: 32),
-              onPressed: _switchCamera,
-              tooltip: 'Trocar Câmera',
+            child: Semantics(
+              label: 'Câmera $_strCameraMode: Trocar modo de câmera',
+              button: true,
+              child: ExcludeSemantics(
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.cameraswitch,
+                    color: Colors.white,
+                    size: 32,
+                  ),
+                  onPressed: _switchCamera,
+                  tooltip: 'Trocar Câmera',
+                ),
+              ),
             ),
           ),
-        
-        Positioned(
-          bottom: 80,
-          left: 0,
-          right: 0,
-          child: Center(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                // Apenas para o emulador
-                Tooltip(
-                  message: 'Abrir galeria',
-                  child: FloatingActionButton(
-                    tooltip: 'Abrir galeria',
-                    backgroundColor: Colors.grey[300],
-                    onPressed: _pickImageFromGallery,
-                    child: Icon(Icons.photo, color: Colors.black, size: 45),
+
+          Positioned(
+            bottom: 80,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  // Apenas para o emulador
+                  Tooltip(
+                    message: 'Abrir galeria',
+                    child: FloatingActionButton(
+                      tooltip: 'Abrir galeria',
+                      backgroundColor: Colors.grey[300],
+                      onPressed: _pickImageFromGallery,
+                      child: Icon(Icons.photo, color: Colors.black, size: 45),
+                    ),
                   ),
-                ),
-                // Botão de tirar foto
-                Tooltip(
-                  message: 'Tirar foto',
-                  child: FloatingActionButton(
-                    tooltip: 'Tirar foto',
-                    backgroundColor: Colors.white,
-                    onPressed: _takePhoto,
-                    shape: const CircleBorder(),
-                    elevation: 4,
-                    child: const Icon(Icons.camera_alt, color: Colors.black, size: 45),
+                  // Botão de tirar foto
+                  Semantics(
+                    label: 'Tirar foto',
+                    button: true,
+                    child: ExcludeSemantics(
+                      child: Tooltip(
+                        message: 'Tirar foto',
+                        child: FloatingActionButton(
+                          tooltip: 'Tirar foto',
+                          backgroundColor: Colors.white,
+                          onPressed: _takePhoto,
+                          shape: const CircleBorder(),
+                          elevation: 4,
+                          child: const Icon(
+                            Icons.camera_alt,
+                            color: Colors.black,
+                            size: 45,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ],
-            )
+                ],
+              ),
+            ),
           ),
-        ),
-      ],
-    ),
-  );
+        ],
+      ),
+    );
   }
 }

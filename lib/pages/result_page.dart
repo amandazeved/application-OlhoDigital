@@ -218,13 +218,16 @@ class _ResultPageState extends State<ResultPage> with RouteAware {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading:  Tooltip(
-            message: 'Voltar',
-            child: IconButton(
-              tooltip: 'Voltar para menu inicial',
-              icon: Icon(Icons.arrow_back, color: Color(0xFF062757), size: 36),
-              onPressed: () => Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false), // Voltar para a tela inicial
-            ),
+        leading:  Semantics(
+              label: 'Voltar para menu inicial',
+              button: true,
+              child: ExcludeSemantics(
+                child:  IconButton(
+                  tooltip: 'Voltar para menu inicial',
+                  icon: Icon(Icons.arrow_back, color: Color(0xFF062757), size: 36),
+                  onPressed: () => Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false), // Voltar para a tela inicial
+                ),
+              ),           
           ),
       ),
       body: _loading

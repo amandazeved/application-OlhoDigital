@@ -88,10 +88,16 @@ class _HomePageState extends State<HomePage> with RouteAware{
           Positioned(
             top: 40,
             right: 20,
-            child: IconButton(
-              tooltip: 'Configurações',
-              onPressed: () => Navigator.pushNamed(context, '/settings'), 
-              icon: Icon(Icons.settings, color: Color(0xFF062757), size: 36)
+            child: Semantics(
+              label: 'Configurações',
+              button: true,
+              child: ExcludeSemantics(
+                child: IconButton(
+                  tooltip: 'Configurações',
+                  onPressed: () => Navigator.pushNamed(context, '/settings'), 
+                  icon: Icon(Icons.settings, color: Color(0xFF062757), size: 36)
+                ),
+              ),
             )
           ),
         ],
